@@ -9,7 +9,7 @@ title: 配置参考
 
 | 文件 | 用途 | 生效方式 |
 | --- | --- | --- |
-| `settings.yml` | 预览、BossBar、装备信息继承和商城隐藏 | `/cf reload` |
+| `settings.yml` | Debug、预览、BossBar、装备信息继承和商城隐藏 | `/cf reload` |
 | `database.yml` | SQLite / MySQL 选择和连接地址 | 完整重启 |
 | `datasource.yml` | HikariCP 连接池参数 | 完整重启 |
 | `fashion/default.yml` | 默认时装定义 | `/cf reload` |
@@ -23,6 +23,10 @@ title: 配置参考
 ## 🧩 settings.yml
 
 ```yaml
+# 调试设置。仅排查问题时开启，日志量会明显增加。
+debug:
+  enabled: false
+
 # 时装设置
 fashion:
   # 试穿时长 (秒)
@@ -48,6 +52,7 @@ preview:
 
 | 路径 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
+| `debug.enabled` | 布尔值 | `false` | 输出时装数据包、视觉缓存和创造背包操作日志；仅排障时开启。 |
 | `fashion.previewTime` | 整数秒 | `10` | 试穿时长，范围 1 至 86400；超出范围回退到 10。 |
 | `fashion.previewCooldown` | 整数秒 | `60` | 预览结束后的冷却时间，范围 0 至 86400。 |
 | `fashion.inheritItemMeta` | 布尔值 | `true` | 是否复制实际装备的名称、Lore、附魔、属性等，同时保留时装样式。默认文件明确配置为 true；键缺失时源码回退为 false。 |
@@ -56,6 +61,34 @@ preview:
 | `preview.bossbar.title` | 文本 | 见上方 | 支持 `{fashion}`、`{remaining}`、`{total}`。 |
 | `preview.bossbar.color` | `BarColor` | `YELLOW` | 支持 Bukkit 的 BossBar 颜色枚举。 |
 | `preview.bossbar.style` | `BarStyle` | `SOLID` | 支持 `SOLID`、`SEGMENTED_6`、`SEGMENTED_10`、`SEGMENTED_12`、`SEGMENTED_20`。 |
+
+### 🐞 Debug 日志
+
+将 `debug.enabled` 改为 `true` 后执行 `/cf reload` 即可启用。每条日志包含连续的 `[Debug #编号]`，常见分类如下：
+
+| 分类 | 含义 |
+| --- | --- |
+| `VISUAL_CACHE` | 玩家当前槽位、手持类型和时装缓存发生刷新。 |
+| `SEND_EQUIPMENT` | 插件替换了发往观察者的实体装备包。 |
+| `SEND_SET_SLOT` / `SEND_CONTENT` | 插件替换了玩家自身背包的单槽位或完整内容包。 |
+| `RECV_CREATIVE_SLOT` | 创造客户端向服务器提交槽位物品，包括 AIR。 |
+| `BUKKIT_CREATIVE` | Bukkit 收到的创造背包动作、槽位、当前物品和 cursor。 |
+| `SKIP_CREATIVE_*` | 创造模式安全保护已跳过玩家自身的视觉替换或主动刷新。 |
+
+Debug 会显著增加控制台输出。完成复现并保存相关连续日志后，应将开关恢复为 `false`。
+
+### 🛡️ 创造模式显示规则
+
+创造模式的槽位内容由客户端通过 `ServerboundSetCreativeModeSlotPacket` 直接提交。若客户端收到与服务器真实物品不同的视觉时装，点击背包时可能把视觉物品或 AIR 写回真实槽位。
+
+因此插件采用以下固定保护规则：
+
+- 创造玩家自己的背包槽位不应用物品式时装替换。
+- 插件不会主动向创造玩家本人发送时装装备刷新，也不会在常规缓存刷新中反复刷新其完整背包。
+- 切换到创造模式时会同步一次真实库存，清除客户端残留的视觉状态。
+- 其他玩家观察该创造玩家时仍会看到正常时装外观。
+
+该保护不是可关闭选项。ModelEngine / BetterModel 的独立模型不通过背包物品替换，但其实际可见范围仍取决于对应模型插件。
 
 ## 🗄️ database.yml
 

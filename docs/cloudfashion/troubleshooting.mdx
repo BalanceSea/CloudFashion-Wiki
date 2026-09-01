@@ -33,6 +33,24 @@ title: 运维与故障排查
 
 确认模型 ID 已在对应插件中加载，模型提供方与实际插件一致。BetterModel 与 ModelEngine 的可用平台要求请以对应插件自身文档为准；不满足时可改用另一模型引擎或普通装备时装。
 
+### 🧱 创造模式点击物品后物品消失
+
+创造模式库存由客户端直接提交，服务端会接受 `ServerboundSetCreativeModeSlotPacket` 中的槽位物品。CloudFashion 会跳过创造玩家自身的背包替换、实体装备替换和主动装备刷新，其他玩家仍能看到该玩家的时装。
+
+排查步骤：
+
+1. 确认已经完整替换最新 CloudFashion JAR 并重启服务器，不要使用服务端 `/reload` 热替换插件。
+2. 在 `settings.yml` 中设置 `debug.enabled: true`，执行 `/cf reload`。
+3. 进入创造模式，手持目标物品并在背包中复现一次。
+4. 检查日志是否出现 `SKIP_CREATIVE_CONTENT`、`SKIP_CREATIVE_SET_SLOT`、`SKIP_CREATIVE_SELF_EQUIPMENT` 或 `SKIP_CREATIVE_SELF_REFRESH`。
+5. 保存物品消失前后的连续 `[Debug #编号]` 日志，然后关闭 Debug。
+
+正常情况下，创造玩家自身的槽位不应出现在 `SEND_CONTENT replacements` 中。如果日志出现 `RECV_CREATIVE_SLOT ... item=0 minecraft:air`，但此前没有 CloudFashion 对同一玩家和槽位的 `SEND_SET_SLOT` 或 `SEND_CONTENT` 替换，应继续检查其他数据包插件、菜单插件或客户端模组。
+
+### 🐞 Debug 报错 `Short cannot be cast to Integer`
+
+这是旧版 Debug 监听按 `Int` 读取创造槽位号导致的问题，物品槽位在当前协议中可能是 `Short`。更新到已使用 `Number` 兼容读取的版本后完整重启即可。外层出现的“`PacketManager is not an instance of PacketManager`”是 TabooLib 反射调用包装信息，并不表示插件加载了两个同名类。
+
 ## 🗄️ 数据库表
 
 插件使用 `cloudfashion_player_data` 保存玩家数据：
