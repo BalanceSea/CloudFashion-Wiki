@@ -1,0 +1,46 @@
+---
+sidebar_position: 3
+title: 命令与权限
+---
+
+# 🎮 命令与权限
+
+主命令是 `/cloudfashion`，当前别名为 `/cf` 和 `/fashion`。直接执行主命令只发送帮助信息，不打开 GUI。
+
+## 🧑 玩家命令
+
+| 命令 | 权限 | 默认 | 说明 |
+| --- | --- | --- | --- |
+| `/cloudfashion` | `cloudfashion.command.use` | 所有人 | 逐行显示帮助；拥有管理员权限时追加管理员帮助。 |
+| `/cf shop` | `cloudfashion.command.use` | 所有人 | 打开时装商城。普通点击试穿，Shift 点击购买。 |
+| `/cf wardrobe` | `cloudfashion.command.use` | 所有人 | 打开衣橱槽位和对应时装选择界面。 |
+| `/cf slots` | `cloudfashion.command.use` | 所有人 | 打开可穿戴时装槽位菜单。 |
+| `/cf preview <时装ID>` | `cloudfashion.command.preview` | 所有人 | 预览指定时装，不检查该时装的单件 `permission`。 |
+| `/cf list` | `cloudfashion.command.use` | 所有人 | 列出已购买、管理员发放和权限解锁的时装。 |
+| `/cf equip <时装ID>` | `cloudfashion.command.use` | 所有人 | 穿戴已拥有或拥有对应时装权限的时装。 |
+| `/cf unequip <时装类型>` | `cloudfashion.command.use` | 所有人 | 脱下指定类型的时装。 |
+
+## 🛠️ 管理员命令
+
+| 命令 | 权限 | 默认 | 说明 |
+| --- | --- | --- | --- |
+| `/cf admin` | `cloudfashion.command.admin` | OP | 打开时装管理列表和编辑器。 |
+| `/cf give <玩家> <时装ID>` | `cloudfashion.command.admin` | OP | 给在线玩家添加持久化拥有记录。 |
+| `/cf take <玩家> <时装ID>` | `cloudfashion.command.admin` | OP | 收回持久化拥有记录，并清除对应持久化时装的穿戴。 |
+| `/cf reload` | `cloudfashion.command.admin` | OP | 清理预览和菜单，重载时装、设置与 GUI，刷新在线玩家。 |
+| `/cf test` | `cloudfashion.command.admin` | OP | 输出当前已加载时装的 ID 和类型。 |
+
+## 🔐 权限节点
+
+| 权限 | 默认 | 作用 |
+| --- | --- | --- |
+| `cloudfashion.command.use` | `true` | 基础命令、商城、衣橱、槽位、列表、穿戴和脱下。 |
+| `cloudfashion.command.preview` | `true` | 执行预览命令；这是命令权限，不是单件时装解锁权限。 |
+| `cloudfashion.command.admin` | `op` | 管理员帮助、管理 GUI、发放、收回、重载和测试。 |
+| `cloudfashion.fashion.<id>` | 由时装配置决定 | 当时装配置的 `permission` 使用该节点时，拥有权限即可直接使用对应时装。 |
+
+## 🎁 权限解锁与购买
+
+时装的 `permission` 是直接解锁条件，不会写入数据库的 `all_fashions`。拥有权限的玩家可以直接在衣橱中使用该时装；点击商城购买时会返回“无需购买”，不会扣除金币或点券。
+
+移除权限后，只有没有持久化拥有记录的当前穿戴会被自动清除。管理员使用 `/cf take` 只能收回持久化拥有记录；取消权限解锁需要在权限插件中移除对应权限。

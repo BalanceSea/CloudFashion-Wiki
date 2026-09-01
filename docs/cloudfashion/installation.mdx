@@ -1,0 +1,49 @@
+---
+sidebar_position: 2
+title: 安装与依赖
+---
+
+# 📦 安装与依赖
+
+## 🧰 环境要求
+
+| 项目 | 要求 |
+| --- | --- |
+| Minecraft | 1.20.4+，项目使用 Bukkit API 1.20 / v12004 映射 |
+| Java | 基础功能使用符合服务端要求的 Java；推荐 Java 17+ |
+
+## 🔌 软依赖
+
+CloudFashion 不会把第三方插件打包进自身 JAR。只安装实际使用功能对应的依赖即可。
+
+| 插件 | 用途 | 缺失时行为 |
+| --- | --- | --- |
+| CraftEngine | `source:CE:` 时装物品 | 对应物品无法构建，普通原版时装仍可加载。 |
+| ItemsAdder | `source:IA:` 时装物品 | 对应物品无法构建，普通原版时装仍可加载。 |
+| ModelEngine | Balloon 模型 | ModelEngine 模型不显示，普通装备时装不受影响。 |
+| BetterModel | Backpack / Balloon 模型 | BetterModel 模型不显示，普通装备时装不受影响。 |
+| Vault 与 Economy 提供者 | 金币购买 | 金币购买不可用；点券购买不受影响。 |
+| PlayerPoints | 点券购买 | 点券购买不可用；金币购买不受影响。 |
+
+服务器控制台只有在对应插件已安装且启用时才显示“软依赖 XXX 已兼容”。ModelEngine 与 BetterModel 是两个独立适配器，可以任选其一，也可以同时安装并按时装配置选择提供方。
+
+## 🛠️ 安装步骤
+
+1. 使用 Paper 或 Spigot 兼容服务端，并确认 Java 版本满足服务端和所选模型插件要求。
+2. 将 `CloudFashion-1.0.0-SNAPSHOT.jar` 放入 `plugins/`。
+3. 按时装来源安装 CraftEngine / ItemsAdder；按模型类型安装 ModelEngine 或 BetterModel。
+4. 如果启用商城货币，安装 Vault 加经济插件，或安装 PlayerPoints。
+5. 完整启动一次服务器，让插件生成 `plugins/CloudFashion/` 配置目录。
+6. 准备 CraftEngine、ItemsAdder 或模型插件要求的资源包，并确认客户端已加载。
+
+## ✅ 安装后检查
+
+```text
+/plugins
+/cf
+/cf shop
+/cf wardrobe
+/cf preview default_helmet
+```
+
+`/cf` 应逐行显示帮助信息。`/cf shop`、`/cf wardrobe` 和 `/cf preview` 分别用于验证菜单、数据和预览功能。修改 `database.yml` 或 `datasource.yml` 后必须完整重启；普通功能配置修改后执行 `/cf reload`。

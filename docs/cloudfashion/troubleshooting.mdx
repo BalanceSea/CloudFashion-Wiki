@@ -1,0 +1,48 @@
+---
+sidebar_position: 6
+title: 运维与故障排查
+---
+
+# 🧰 运维与故障排查
+
+## 🔄 重载与关闭
+
+`/cf reload` 会清理所有预览、BossBar 和菜单，重载时装、设置及 GUI，重建视觉缓存并刷新在线玩家。数据库连接池不会通过该命令重建；修改数据库类型、地址或连接池参数后必须完整重启服务器。
+
+玩家退出时会清理视觉缓存、模型绑定和预览状态，并保存玩家数据。停服时插件会取消周期任务、BossBar、菜单和未完成的数据操作。
+
+## ❓ 常见问题
+
+### 🧩 出现 `Json$default` 或 `FashionDataCodec` 初始化错误
+
+这是 Kotlin Serialization 运行时版本或 relocate 冲突。确认最终插件使用 `kotlinx.serialization164` 隔离包名，删除旧插件 JAR 和 TabooLib 缓存后完整重启，不要热重载替换 JAR。
+
+### 🪖 穿戴时装后显示成真实头盔
+
+检查时装是否成功加载、数据包转换是否成功，并查看 `PacketVisualCache` 的警告。`inheritItemMeta` 只应复制真实装备的名称、Lore、附魔和属性，时装自身的材质、模型标识仍应保留；转换失败时应回退到时装物品。
+
+### 🏷️ 物品名称和 Lore 没有继承
+
+确认 `settings.yml` 中 `fashion.inheritItemMeta: true`，并执行 `/cf reload`。没有自定义名称的原版装备会使用材质的客户端本地化名称；时装配置的 `item.name` 只在没有实际装备或未启用继承时作为时装名称。
+
+### 🛒 商城没有显示时装
+
+依次检查 `shop.enabled`、`fashion.shop.hideAvailable`、玩家的拥有记录、时装 `permission`、商城分类筛选、价格以及对应的 Vault 或 PlayerPoints 依赖。
+
+### 🎭 模型不显示
+
+确认模型 ID 已在对应插件中加载，模型提供方与实际插件一致。BetterModel 与 ModelEngine 的可用平台要求请以对应插件自身文档为准；不满足时可改用另一模型引擎或普通装备时装。
+
+## 🗄️ 数据库表
+
+插件使用 `cloudfashion_player_data` 保存玩家数据：
+
+| 字段 | 用途 |
+| --- | --- |
+| `id` | TabooLib 自动主键。 |
+| `player_uuid` | 玩家 UUID，唯一。 |
+| `player_name` | 最近一次保存的玩家名称。 |
+| `current_fashion` | 按时装类型保存当前穿戴 ID 的 JSON 对象。 |
+| `all_fashions` | 逗号分隔的持久化拥有时装 ID；权限解锁不写入此列。 |
+
+SQLite 适合单服，MySQL 适合多服共享。数据库密码不要提交到公开仓库。

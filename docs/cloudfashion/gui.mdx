@@ -1,0 +1,58 @@
+---
+sidebar_position: 4
+title: GUI 与预览
+---
+
+# 🖼️ GUI 与预览
+
+## 📁 GUI 文件结构
+
+每个菜单都有独立文件，位置固定为：
+
+```text
+plugins/CloudFashion/gui/shop.yml
+plugins/CloudFashion/gui/wardrobe.yml
+plugins/CloudFashion/gui/slots.yml
+plugins/CloudFashion/gui/admin.yml
+```
+
+配置使用 TrMenu 风格的 `Title`、`Rows`、`Layout`、`Icons` 和 `CustomIcons` 节点：
+
+- `Icons` 用于固定按钮，例如翻页、关闭、返回和分类。
+- `CustomIcons` 用于动态时装、槽位和空状态按钮。
+- `Layout` 控制按钮位置；菜单底部集中放置返回、翻页和关闭按钮。
+- 修改后执行 `/cf reload`。
+
+`Name` 未配置时由插件使用默认名称；不要用空的 `Name` 节点覆盖默认名称。需要明确空白名称时使用 `Name: ' '`。
+
+## 🧭 菜单用途
+
+| 菜单 | 用途 |
+| --- | --- |
+| `shop.yml` | 按时装分类显示商城商品，标题显示当前分类数量；点击试穿，Shift 点击购买。 |
+| `wardrobe.yml` | 按当前选择的槽位列出玩家可使用的时装，点击穿戴或脱下。 |
+| `slots.yml` | 显示头盔、胸甲、护腿、靴子、武器和工具等可穿戴槽位，以及每个槽位的数量和当前穿戴。 |
+| `admin.yml` | 管理员浏览时装并编辑商城状态、货币、价格、名称、材质、模型提供方、模型 ID 和权限。 |
+
+## 🛍️ 商城分类
+
+商城分类依据时装的 `type` 生成。分类按钮可以显示当前分类和数量，`{categories}` 会生成所有分类及其数量的多行文本。商城商品的数量会受以下条件影响：
+
+- `shop.enabled` 必须为 `true`。
+- `fashion.shop.hideAvailable` 为 `true` 时，已购买或权限解锁的时装隐藏。
+- 没有权限、没有购买记录的玩家仍可看到可购买时装。
+
+## ⏱️ 试穿 BossBar
+
+预览开始后创建 BossBar，标题支持 `{fashion}`、`{remaining}` 和 `{total}`。到达预览时间后，插件清理预览状态并恢复玩家原本的时装状态；退出、插件重载和插件关闭也会清理 BossBar。
+
+```yaml
+preview:
+  bossbar:
+    enabled: true
+    title: "&e正在预览 &f{fashion} &7| 剩余 &e{remaining}秒"
+    color: YELLOW
+    style: SOLID
+```
+
+预览持续时间和冷却时间分别由 `fashion.previewTime` 与 `fashion.previewCooldown` 控制。预览不验证单件时装 `permission`，但 `/cf preview` 仍需要命令权限。

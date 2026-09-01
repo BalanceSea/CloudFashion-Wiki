@@ -1,0 +1,46 @@
+---
+sidebar_position: 1
+title: CloudFashion 云时装
+description: CloudFashion 高版本 Minecraft 时装系统使用文档
+---
+
+# ✨ CloudFashion 云时装
+
+CloudFashion 是一款面向 Paper / Spigot 兼容服务端的高版本 Minecraft 时装插件。它通过数据包替换玩家看到的装备外观，同时保留玩家真实装备的战斗属性和背包数据。
+
+## 🎯 适用场景
+
+- 生存服、RPG 服和小游戏服的外观商城。
+- 使用 CraftEngine 或 ItemsAdder 物品作为时装材质。
+- 使用 ModelEngine 或 BetterModel 展示背包和气球模型。
+- 通过权限节点直接解锁特定时装，并在失去权限时自动清理穿戴状态。
+
+## ✨ 核心功能
+
+| 功能 | 说明 |
+| --- | --- |
+| 🛍️ 时装商城 | 支持分类筛选、分类数量、试穿以及金币或点券购买。 |
+| 👗 时装衣橱 | 查看已购买、管理员发放和权限解锁的时装，并按槽位单独穿戴或脱下。 |
+| ⏱️ 预览 BossBar | 试穿期间显示可配置倒计时；预览结束后自动恢复原穿戴状态。 |
+| 🎭 视觉替换 | 支持头盔、胸甲、护腿、靴子、武器、工具、盾牌、背包和气球。 |
+| 🧬 装备信息继承 | 开启 `inheritItemMeta` 后，视觉时装复制实际装备的名称、Lore、附魔、属性等信息，但保留时装自身样式。 |
+| 🖼️ 独立 GUI | `gui` 文件夹内每个菜单使用独立的 TrMenu 风格 YAML 配置。固定按钮使用 `Icons`，动态时装和槽位使用 `CustomIcons`。 |
+
+## ⚙️ 重要规则
+
+- 直接执行 `/cf` 只发送帮助信息，不会打开菜单；帮助中的每条命令独占一行。
+- 预览命令需要 `cloudfashion.command.preview`，但不会检查单件时装配置中的 `permission`。
+- 玩家拥有某件时装配置中的 `permission` 时，直接获得使用权，不需要购买或管理员发放。
+- 权限解锁不会写入持久化拥有列表。权限失效且玩家没有持久化拥有记录时，当前穿戴会被清除。
+- 商城启用 `hideAvailable: true` 时，已购买或已通过权限解锁的时装不会显示。
+- `item.name` 未配置时使用来源物品的名称；配置 `Name: ' '` 或 `item.name: ' '` 时表示明确使用空白名称。
+
+## 🚀 快速开始
+
+1. 将插件放入服务端的 `plugins/` 目录。
+2. 根据需要安装软依赖并准备客户端资源包。
+3. 启动服务器，确认插件加载成功。
+4. 编辑 `plugins/CloudFashion/` 下的配置文件。
+5. 执行 `/cf reload`，再使用 `/cf shop` 或 `/cf wardrobe` 验证。
+
+下一步请阅读[安装与依赖](./installation)和[命令与权限](./commands)。

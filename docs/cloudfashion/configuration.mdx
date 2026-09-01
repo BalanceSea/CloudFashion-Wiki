@@ -1,0 +1,635 @@
+---
+sidebar_position: 5
+title: 配置参考
+---
+
+# ⚙️ 配置参考
+
+配置目录是 `plugins/CloudFashion/`。插件当前生成或读取以下文件：
+
+| 文件 | 用途 | 生效方式 |
+| --- | --- | --- |
+| `settings.yml` | 预览、BossBar、装备信息继承和商城隐藏 | `/cf reload` |
+| `database.yml` | SQLite / MySQL 选择和连接地址 | 完整重启 |
+| `datasource.yml` | HikariCP 连接池参数 | 完整重启 |
+| `fashion/default.yml` | 默认时装定义 | `/cf reload` |
+| `fashion/*.yml` | `fashion` 文件夹内新增的时装定义 | `/cf reload` |
+| `gui/shop.yml` | 时装商城和分类 | `/cf reload` |
+| `gui/wardrobe.yml` | 时装衣橱 | `/cf reload` |
+| `gui/slots.yml` | 时装槽位 | `/cf reload` |
+| `gui/admin.yml` | 管理员列表和编辑器 | `/cf reload` |
+| `lang/zh_CN.yml` | 中文消息和帮助 | 重启后读取 |
+
+## 🧩 settings.yml
+
+```yaml
+# 时装设置
+fashion:
+  # 试穿时长 (秒)
+  previewTime: 10
+  # 预览冷却 (秒)
+  previewCooldown: 60
+  # 是否将玩家实际穿戴物品的名称、Lore、附魔、属性和耐久等复制到时装视觉物品。
+  inheritItemMeta: true
+  shop:
+    # 是否在商城中隐藏玩家已经购买或通过权限解锁的时装。
+    hideAvailable: true
+
+# 预览倒计时 BossBar
+preview:
+  bossbar:
+    enabled: true
+    # 可用占位符: {fashion}(时装展示名), {remaining}, {total}
+    title: "&e正在预览 &f{fashion} &7| 剩余 &e{remaining}秒"
+    color: YELLOW
+    # SOLID, SEGMENTED_6, SEGMENTED_10, SEGMENTED_12, SEGMENTED_20
+    style: SOLID
+```
+
+| 路径 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `fashion.previewTime` | 整数秒 | `10` | 试穿时长，范围 1 至 86400；超出范围回退到 10。 |
+| `fashion.previewCooldown` | 整数秒 | `60` | 预览结束后的冷却时间，范围 0 至 86400。 |
+| `fashion.inheritItemMeta` | 布尔值 | `true` | 是否复制实际装备的名称、Lore、附魔、属性等，同时保留时装样式。默认文件明确配置为 true；键缺失时源码回退为 false。 |
+| `fashion.shop.hideAvailable` | 布尔值 | `true` | 是否隐藏已购买或权限解锁的商城时装。 |
+| `preview.bossbar.enabled` | 布尔值 | `true` | 是否显示预览倒计时 BossBar。 |
+| `preview.bossbar.title` | 文本 | 见上方 | 支持 `{fashion}`、`{remaining}`、`{total}`。 |
+| `preview.bossbar.color` | `BarColor` | `YELLOW` | 支持 Bukkit 的 BossBar 颜色枚举。 |
+| `preview.bossbar.style` | `BarStyle` | `SOLID` | 支持 `SOLID`、`SEGMENTED_6`、`SEGMENTED_10`、`SEGMENTED_12`、`SEGMENTED_20`。 |
+
+## 🗄️ database.yml
+
+```yaml
+# SQLite适用于单端 MYSQL适用于群组服务器
+
+SQLite:
+  file: "CloudFashion.db"
+MYSQL:
+  # 是否开启 不开启默认使用SQLite
+  enable: false
+  # 数据库IP
+  host: localhost
+  # 数据库端口
+  port: 3306
+  # 数据库用户名
+  user: root
+  # 数据库密码
+  password: your_password
+  # 数据库名称
+  database: cloudfashion
+```
+
+| 路径 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `SQLite.file` | 文件路径 | `CloudFashion.db` | SQLite 文件；路径必须位于插件数据目录内。 |
+| `MYSQL.enable` | 布尔值 | `false` | 为 `true` 时使用 MySQL，否则使用 SQLite。 |
+| `MYSQL.host` | 文本 | `localhost` | MySQL 主机。 |
+| `MYSQL.port` | 整数 | `3306` | MySQL 端口。 |
+| `MYSQL.user` | 文本 | `root` | MySQL 用户名。 |
+| `MYSQL.password` | 敏感文本 | `your_password` | MySQL 密码，请替换为真实值且不要提交到公开仓库。 |
+| `MYSQL.database` | 文本 | `cloudfashion` | MySQL 数据库名称。 |
+
+## 🔗 datasource.yml
+
+```yaml
+DefaultSettings:
+  # 是否自动提交 SQL，默认值 true。
+  AutoCommit: true
+  # 最小空闲连接数，单位为连接数。
+  MinimumIdle: 1
+  # 最大连接数，单服默认 10；按数据库容量调整。
+  MaximumPoolSize: 10
+  # 校验连接超时时间，单位毫秒。
+  ValidationTimeout: 5000
+  # 获取连接超时时间，单位毫秒。
+  ConnectionTimeout: 30000
+  # 空闲连接超时时间，单位毫秒。
+  IdleTimeout: 600000
+  # 连接最大生命周期，单位毫秒。
+  MaxLifetime: 1800000
+  # 保活间隔，单位毫秒；0 表示关闭。
+  KeepaliveTime: 300000
+```
+
+这些参数由 HikariCP 使用，修改后必须完整重启。时间单位均为毫秒，连接数参数应结合数据库容量调整。
+
+## 👗 fashion/default.yml
+
+`fashion/` 文件夹会扫描所有 `.yml` 和 `.yaml` 文件。每个时装 ID 必须全局唯一；新增文件的叶子字段与下方配置相同。
+
+```yaml
+# 时装类型:
+# 装备: Balloon(气球) Backpack(背部) Helmet(头盔) Chestplate(胸甲) Leggings(护腿) Boots(靴子)
+# 武器: Sword(武器) Trident(三叉戟) Bow(弓) Crossbow(弩) Shield(盾牌) Mace(重锤)
+# 工具: Pickaxe(镐子) Axe(斧子) Shovel(锹) Hoe(锄)
+# 特殊工具: FishingRod(钓鱼竿) Shears(剪刀)
+# Balloon / Backpack 可使用 BetterModel / ModelEngine
+# 推荐配置：model.engine 可填写 auto、modelengine 或 bettermodel
+# model:
+#   engine: bettermodel
+#   id: "模型ID"
+# betterModel:
+#   id: "BetterModel模型ID"
+# 旧配置 model: "模型ID"、modelEngine.model 仍然兼容
+# 时装物品唯一ID
+"default_helmet":
+  # 时装类型
+  type: "Helmet"
+  # 可选权限。玩家拥有此权限时，无需购买或管理员发放即可使用该时装。
+  # 留空或删除该配置表示仅通过拥有记录解锁。
+  permission: "cloudfashion.fashion.default_helmet"
+  # 时装物品源
+  item:
+    # source:CE:namespace:id 引用 CraftEngine 物品
+    # source:IA:namespaceID 引用 ItemsAdder 物品
+    # 该配置会用于GUI界面中显示 材质会用于时装
+    material: "source:CE:default:topaz_helmet"
+    # name lore 等只会在玩家没有穿戴盔甲时显示
+    name: "&e黄玉头盔"
+    lore:
+      - "&e超级炫酷的头盔"
+    # 物品自定义模型数据 默认为 -1 不会生效
+    customModelData: -1
+  # 商城设置：currency 可填写 coins 或 points；未配置价格时不可购买
+  shop:
+    enabled: true
+    currency: points
+    price:
+      coins: 100
+      points: 1000
+"default_chestplate":
+  type: "Chestplate"
+  permission: "cloudfashion.fashion.default_chestplate"
+  item:
+    material: "source:CE:default:topaz_chestplate"
+    name: "&e黄玉胸甲"
+  shop:
+    enabled: true
+    currency: points
+    price:
+      coins: 100
+      points: 1000
+
+"default_leggings":
+  type: "Leggings"
+  permission: "cloudfashion.fashion.default_leggings"
+  item:
+    material: "source:CE:default:topaz_leggings"
+    name: "&e黄玉护腿"
+  shop:
+    enabled: true
+    currency: points
+    price:
+      coins: 100
+      points: 1000
+"default_boots":
+  type: "Boots"
+  permission: "cloudfashion.fashion.default_boots"
+  item:
+    material: "source:CE:default:topaz_boots"
+    name: "&e黄玉靴子"
+  shop:
+    enabled: true
+    currency: points
+    price:
+      coins: 100
+      points: 1000
+"default_sword":
+  type: "Sword"
+  permission: "cloudfashion.fashion.sword"
+  item:
+    material: "source:CE:default:topaz_sword"
+    name: "&e黄玉剑"
+  shop:
+    enabled: true
+    currency: points
+    price:
+      coins: 100
+      points: 1000
+```
+
+### 时装字段
+
+| 路径 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `<id>.type` | 枚举 | 无 | `Balloon`、`Backpack`、`Helmet`、`Chestplate`、`Leggings`、`Boots`、`Sword`、`Trident`、`Bow`、`Crossbow`、`Shield`、`Mace`、`Pickaxe`、`Axe`、`Shovel`、`Hoe`、`FishingRod`、`Shears` 或 `None`。 |
+| `<id>.permission` | 文本 | 未配置 | 拥有该权限即可直接使用时装；权限失效且无持久化拥有记录时清理穿戴。 |
+| `<id>.item.material` | 文本 | `air` | 原版材质、XMaterial、`source:CE:<namespace>:<id>` 或 `source:IA:<namespace>:<id>`。 |
+| `<id>.item.name` | Legacy 文本 | 未配置 | 时装展示名称；未配置时保留来源物品名称，明确配置 `' '` 才使用空白名称。 |
+| `<id>.item.lore` | 文本列表 | `[]` | 时装基础 Lore；继承开关开启且有实际装备时复制实际装备 Lore。 |
+| `<id>.item.customModelData` | 整数 | `-1` | 大于 0 时应用原版自定义模型数据。 |
+| `<id>.model` | 文本或对象 | 未配置 | 兼容旧模型 ID；推荐使用 `model.engine` 与模型 ID。 |
+| `<id>.model.engine` | 枚举 | `auto` | `auto`、`modelengine` 或 `bettermodel`。 |
+| `<id>.model.id` | 文本 | 未配置 | 通用模型 ID。 |
+| `<id>.modelEngine.model` / `.id` | 文本 | 未配置 | ModelEngine 兼容字段。 |
+| `<id>.betterModel.model` / `.id` | 文本 | 未配置 | BetterModel 兼容字段。 |
+| `<id>.shop.enabled` | 布尔值 | `true` | 是否在商城上架。 |
+| `<id>.shop.currency` | 枚举 | `coins` | `coins` 或 `points`。非法值回退 `coins`。 |
+| `<id>.shop.price.coins` | 小数 | 未配置 | 金币价格；小于 0 的值视为未配置。 |
+| `<id>.shop.price.points` | 整数 | 未配置 | 点券价格；小于 0 的值视为未配置。 |
+
+无效类型会跳过该时装；重复 ID 会保留先加载的定义并跳过后续定义。旧版插件数据目录根部的 `fashion.yml` 会在 `fashion/default.yml` 不存在时迁移为 `fashion/default.yml`；如果目标文件已存在，旧文件不会加载。
+
+## 🛍️ gui/shop.yml
+
+```yaml
+Title: '&8时装商城 &7[{category}: {category-count}件] &7({page}/{pages})'
+Rows: 6
+Layout:
+  - '#########'
+  - '#FFFFFFF#'
+  - '#FFFFFFF#'
+  - '#FFFFFFF#'
+  - '####E####'
+  - 'BGA#P#X#N'
+
+Icons:
+  '#':
+    Material: GRAY_STAINED_GLASS_PANE
+    Name: ' '
+    Action: none
+  B:
+    Material: ARROW
+    Name: '&a时装衣橱'
+    Action: wardrobe
+  A:
+    Material: ARROW
+    Name: '&e上一页'
+    Action: previous
+  P:
+    Material: PAPER
+    Name: '&f第 &e{page} &f/ &e{pages} &f页'
+    Action: none
+  X:
+    Material: BARRIER
+    Name: '&c关闭'
+    Action: close
+  N:
+    Material: ARROW
+    Name: '&e下一页'
+    Action: next
+  G:
+    Material: COMPASS
+    Name: '&b分类: &f{category} &7({category-count}件)'
+    Lore:
+      - '&7点击切换分类'
+      - '&f各分类数量:'
+      - '{categories}'
+    Action: category
+
+CustomIcons:
+  E:
+    Material: BARRIER
+    Name: '&7商城暂无时装'
+    Action: empty
+  F:
+    Material: PAPER
+    Name: '{fashion}'
+    Lore:
+      - '&7类型: &f{type}'
+      - '&7价格: &e{price} {currency}'
+      - '&a点击试穿'
+      - '&eShift+点击购买'
+    Action: fashion
+```
+
+## 👗 gui/wardrobe.yml
+
+```yaml
+Title: '&8时装衣橱 &7[{slot}: {slot-count}件] &7({page}/{pages})'
+Rows: 6
+Layout:
+  - '#########'
+  - '#FFFFFFF#'
+  - '#FFFFFFF#'
+  - '#FFFFFFF#'
+  - '####E####'
+  - 'BSA#P#X#N'
+
+Icons:
+  '#':
+    Material: GRAY_STAINED_GLASS_PANE
+    Name: ' '
+    Action: none
+  B:
+    Material: ARROW
+    Name: '&b时装商城'
+    Action: shop
+  S:
+    Material: CHEST
+    Name: '&b时装槽位'
+    Action: slots
+  A:
+    Material: ARROW
+    Name: '&e上一页'
+    Action: previous
+  P:
+    Material: PAPER
+    Name: '&f第 &e{page} &f/ &e{pages} &f页'
+    Action: none
+  X:
+    Material: BARRIER
+    Name: '&c关闭'
+    Action: close
+  N:
+    Material: ARROW
+    Name: '&e下一页'
+    Action: next
+
+CustomIcons:
+  E:
+    Material: BARRIER
+    Name: '&7你当前没有可使用的时装'
+    Action: empty
+  F:
+    Material: PAPER
+    Name: '{fashion}'
+    Lore:
+      - '&7槽位: &f{type}'
+      - '{status}'
+    Action: fashion
+```
+
+## 🎒 gui/slots.yml
+
+```yaml
+Title: '&8可穿戴时装槽位'
+Rows: 6
+Layout:
+  - '#########'
+  - '#SSSSSS #'
+  - '#SSSSSS #'
+  - '#SSSSSS #'
+  - '#########'
+  - '###BWX###'
+
+Icons:
+  '#':
+    Material: GRAY_STAINED_GLASS_PANE
+    Name: ' '
+    Action: none
+  B:
+    Material: ARROW
+    Name: '&a时装商城'
+    Action: shop
+  W:
+    Material: CHEST
+    Name: '&b全部已拥有时装'
+    Action: all-fashions
+  X:
+    Material: BARRIER
+    Name: '&c关闭'
+    Action: close
+
+CustomIcons:
+  S:
+    Material: LEATHER_CHESTPLATE
+    Name: '&e{slot}'
+    Lore:
+      - '&7已拥有: &e{slot-count} 件'
+      - '&7当前穿戴: &f{slot-equipped}'
+      - '&a点击查看该槽位时装'
+    Action: slot
+```
+
+## 🛠️ gui/admin.yml
+
+```yaml
+Title: '&8时装管理 &7({page}/{pages})'
+Rows: 6
+Layout:
+  - '#########'
+  - '#FFFFFFF#'
+  - '#FFFFFFF#'
+  - '#FFFFFFF#'
+  - '####E####'
+  - 'RA#P#X#N#'
+
+Icons:
+  '#':
+    Material: GRAY_STAINED_GLASS_PANE
+    Name: ' '
+    Action: none
+  A:
+    Material: ARROW
+    Name: '&e上一页'
+    Action: previous
+  P:
+    Material: PAPER
+    Name: '&f第 &e{page} &f/ &e{pages} &f页'
+    Action: none
+  X:
+    Material: BARRIER
+    Name: '&c关闭'
+    Action: close
+  N:
+    Material: ARROW
+    Name: '&e下一页'
+    Action: next
+  R:
+    Material: CLOCK
+    Name: '&b重载时装配置'
+    Lore:
+      - '&7重新读取 fashion 文件夹'
+    Action: reload
+
+CustomIcons:
+  E:
+    Material: BARRIER
+    Name: '&7没有已加载的时装'
+    Action: empty
+  F:
+    Material: PAPER
+    Name: '{fashion}'
+    Lore:
+      - '&7ID: &f{id}'
+      - '&7类型: &f{type}'
+      - '&7商城: &f{shop-status}'
+      - '&7货币: &f{currency}'
+      - '&7价格: &e{price}'
+      - '&7左键进入编辑'
+    Action: fashion
+
+Editor:
+  Title: '&8编辑时装 &7{fashion}'
+  Rows: 6
+  Layout:
+    - '#I#######'
+    - '#T#C#P#U#'
+    - '#D#N#M#V#'
+    - '#R#Q#####'
+    - '#########'
+    - '#########'
+    - 'B####X###'
+
+  Icons:
+    '#':
+      Material: GRAY_STAINED_GLASS_PANE
+      Name: ' '
+      Action: none
+    X:
+      Material: BARRIER
+      Name: '&c关闭'
+      Action: close
+    B:
+      Material: ARROW
+      Name: '&e返回时装列表'
+      Action: back
+
+  CustomIcons:
+    I:
+      Material: PAPER
+      Name: '{fashion}'
+      Lore:
+        - '&7ID: &f{id}'
+        - '&7类型: &f{type}'
+        - '&7商城: &f{shop-status}'
+        - '&7货币: &f{currency}'
+        - '&7价格: &e{price}'
+        - '&7模型提供方: &f{provider}'
+        - '&7模型: &f{model}'
+        - '&7使用权限: &f{permission}'
+      Action: info
+    T:
+      Material: LEVER
+      Name: '&e切换商城状态'
+      Lore:
+        - '&7当前: &f{shop-status}'
+        - '&a点击切换'
+      Action: toggle-shop
+    C:
+      Material: GOLD_INGOT
+      Name: '&e切换商城货币'
+      Lore:
+        - '&7当前: &f{currency}'
+        - '&a点击切换金币/点券'
+      Action: currency
+    P:
+      Material: PAPER
+      Name: '&e编辑价格'
+      Lore:
+        - '&7当前: &f{price}'
+        - '&7输入 clear 可移除价格'
+      Action: edit-price
+    U:
+      Material: LIME_DYE
+      Name: '&a增加价格'
+      Lore:
+        - '&7左键 +10，Shift+左键 +100'
+      Action: increase-price
+    D:
+      Material: RED_DYE
+      Name: '&c减少价格'
+      Lore:
+        - '&7左键 -10，Shift+左键 -100'
+      Action: decrease-price
+    N:
+      Material: NAME_TAG
+      Name: '&b编辑展示名称'
+      Lore:
+        - '&7输入名称，输入 clear 恢复默认名称'
+      Action: edit-name
+    M:
+      Material: ARMOR_STAND
+      Name: '&d编辑物品材质'
+      Lore:
+        - '&7输入 Bukkit/XMaterial 材质或 source:CE / source:IA'
+      Action: edit-material
+    V:
+      Material: COMPASS
+      Name: '&d切换模型提供方'
+      Lore:
+        - '&7当前: &f{provider}'
+        - '&a点击切换 AUTO/ModelEngine/BetterModel'
+      Action: provider
+    R:
+      Material: CLOCK
+      Name: '&b编辑模型 ID'
+      Lore:
+        - '&7当前模型: &f{model}'
+        - '&7输入 clear 可移除当前模型 ID'
+      Action: edit-model
+    Q:
+      Material: TRIPWIRE_HOOK
+      Name: '&e编辑使用权限'
+      Lore:
+        - '&7当前权限: &f{permission}'
+        - '&7拥有此权限可直接使用该时装'
+        - '&7输入 clear 可移除权限配置'
+      Action: edit-permission
+```
+
+## 💬 lang/zh_CN.yml
+
+```yaml
+prefix: "&7[&b云时装&7] &r"
+help: |-
+  &b可用命令:
+  &f/cf shop &7打开商城
+  &f/cf wardrobe &7打开衣橱
+  &f/cf slots &7查看可穿戴时装槽位
+  &f/cf preview <时装ID> &7试穿时装
+  &f/cf list &7查看已拥有的时装
+  &f/cf equip <时装ID> &7穿戴时装
+  &f/cf unequip <时装类型> &7脱下指定槽位时装
+  &f/cf admin &7打开管理员时装管理
+admin-help: |-
+  &b管理员帮助:
+  &f/cf admin &7打开管理员 GUI
+  &7在列表中点击时装进入编辑页面
+  &7可修改商城状态、货币、价格、名称、材质和模型 ID
+  &7文本编辑时直接在聊天框输入，输入 &ecancel &7取消
+  &7输入 &eclear &7移除当前文本或价格配置
+  &f/cf give <玩家> <时装ID> &7给予玩家时装
+  &f/cf take <玩家> <时装ID> &7解除玩家时装
+  &f/cf reload &7重载全部配置和缓存
+reload-message: "&a重载配置文件成功"
+player-only: "&c该功能只能由玩家使用"
+player-not-found: "&c玩家 &e{0} &c并未在线"
+fashion-not-found: "&c时装 &e{0} &c并未存在"
+fashion-give-success: "&a已给予玩家 &e{0} &a时装 &e{1}"
+fashion-revoke-success: "&a已收回玩家 &e{0} &a时装 &e{1}"
+preview-usage: "&e用法: /cloudfashion preview <时装ID>"
+preview-loading: "&7正在读取你的时装数据..."
+preview-started: "&a已试穿时装 &e{0} &a，持续 &e{1} &a秒"
+preview-cooldown: "&c预览冷却中，请等待 &e{0} &c秒"
+preview-active: "&c你已经在预览时装了"
+preview-unsupported: "&c该时装类型需要专用模型支持，暂时无法预览"
+preview-failed: "&c预览时装失败，请稍后再试"
+fashion-no-access: "&c你没有权限使用时装 &e{0}"
+fashion-equip-success: "&a已穿戴时装 &e{0}"
+fashion-unequip-success: "&a已脱下 &e{0} &a时装"
+fashion-not-owned: "&c你没有拥有时装 &e{0}"
+fashion-type-not-found: "&c未知时装类型: &e{0}"
+fashion-slot-empty: "&c你没有穿戴 &e{0} &c时装"
+fashion-list-empty: "&7你当前没有可使用的时装"
+fashion-list: "&a你可使用的时装: &e{0}"
+data-load-failed: "&c读取时装数据失败，请稍后再试"
+data-save-failed: "&c保存时装数据失败，请稍后再试"
+shop-purchase-success: "&a成功购买时装 &e{0}"
+shop-already-owned: "&e你已经拥有时装 &f{0}"
+shop-permission-unlocked: "&a你已通过权限解锁时装 &e{0}，无需购买"
+shop-not-for-sale: "&c时装 &e{0} &c当前不可购买"
+shop-economy-unavailable: "&c经济系统不可用，请联系管理员"
+shop-insufficient-funds: "&c你的余额不足，无法购买该时装"
+shop-purchase-failed: "&c购买失败，未扣除或已尝试退还费用"
+menu-title: "&b云时装"
+menu-empty: "&7你还没有拥有任何时装"
+menu-previous: "&e上一页"
+menu-next: "&e下一页"
+menu-page: "&f第 &e{0} &f/ &e{1} &f页"
+menu-close: "&c关闭"
+menu-equipped: "&a已穿戴，点击脱下"
+menu-click: "&e点击穿戴"
+menu-fashion-type: "&7类型: &f{0}"
+admin-no-permission: "&c你没有管理员权限"
+admin-fashion-not-found: "&c时装配置不存在或已被移除"
+admin-input: "&e请输入要修改的{0}，输入 &ccancel &e取消"
+admin-input-cancelled: "&7已取消修改"
+admin-invalid-value: "&c输入的值无效，配置未修改"
+admin-updated: "&a时装配置已保存并重新加载"
+admin-update-failed: "&c保存时装配置失败"
+admin-reloaded: "&a时装配置和缓存已重新加载"
+```
+
+帮助内容使用 YAML 多行字符串，插件发送时会保留换行，因此每个命令各占一行。数据库密码使用安全占位值 `your_password`，部署时务必替换。
