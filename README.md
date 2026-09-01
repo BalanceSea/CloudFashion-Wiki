@@ -44,9 +44,9 @@ GIT_USER=<Your GitHub username> npm run deploy
 
 站点已配置为 GitHub Pages 项目站点，预期访问地址为：
 
-`https://balancesea.github.io/CloudFashion/`
+`https://balancesea.github.io/CloudFashion-Wiki/`
 
-1. 将项目推送到 GitHub 仓库 `BalanceSea/CloudFashion` 的 `main` 分支。
+1. 将项目推送到 GitHub 仓库 `BalanceSea/CloudFashion-Wiki` 的 `main` 分支。
 2. 打开仓库 **Settings → Pages**。
 3. 在 **Build and deployment** 的 **Source** 中选择 **GitHub Actions**。
 4. 推送代码或手动运行 `Deploy CloudFashion Docs` 工作流。
